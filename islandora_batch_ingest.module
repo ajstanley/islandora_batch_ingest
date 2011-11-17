@@ -1,0 +1,24 @@
+<?php
+
+function islandora_batch_ingest_islandora_tabs($content_models, $pid) {
+  module_load_include('inc', 'islandora_batch_ingest', 'BatchIngest');
+  $content_model_pids = array();
+  $tabset = array();
+  foreach ($content_models as $content_model) {
+    $content_model_pids[] = $content_model->pid;
+  }
+  if (in_array('islandora:collectionCModel', $content_model_pids)) {
+      $tabset['batch_ingest_tab'] = array(
+        '#type' => 'tabpage',
+        '#title' => t('Batch Ingest'),
+        '#content' => drupal_get_form('batch_creation_form', $pid),
+      );
+  }
+  return $tabset;
+}
+
+function islandora_batch_ingest_perm() {
+  return array(
+    'create batch process',
+  );
+}
