@@ -11,7 +11,17 @@ function batch_creation_form(&$form_state, $collection_pid) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
   module_load_include('inc', 'fedora_repository', 'CollectionPolicy');
   $policy = CollectionPolicy::loadFromCollection($collection_pid, TRUE);
+  if (!$policy) {
+    $form['titlebox'] = array(
+      '#type' => 'item',
+      '#value' => t("This collection is missing a Collection Policy"),
+    );
+
+    return $form;
+  }
+
   $content_models = $policy->getContentModels();
+
   $cm_options = array();
   $name_mappings = array();
   foreach ($content_models as $content_model) {
@@ -20,6 +30,7 @@ function batch_creation_form(&$form_state, $collection_pid) {
       $name_mappings[] = $content_model->pid . '^' . $content_model->pid_namespace;
     }
   }
+
   $mappings = implode('~~~', $name_mappings);
   $form['#attributes']['enctype'] = 'multipart/form-data';
 
@@ -104,7 +115,7 @@ function batch_creation_form_submit($form, &$form_state) {
   $namespace = preg_replace('/:.*/', '', $namespace);
   $dir_name = "temp" . $user->uid;
   $tmp_dir = file_directory_path() . '/' . $dir_name . '/';
-  if (is_dir($tmp_dir)){
+  if (is_dir($tmp_dir)) {
     recursive_directory_delete($tmp_dir);
   }
   mkdir($tmp_dir);
@@ -191,6 +202,7 @@ function create_batch_objects($label, $content_model, $object_files, $collection
       $item->modify_datastream_by_value($data, 'DC', "Dublin Core", 'text/xml');
     }
     if ($identifier == 'mods') {
+      $mods_xml = $data;
       $item->add_datastream_from_string($mods_xml, 'MODS');
       $dc_xml = batch_create_dc_from_mods($mods_xml);
       $item->modify_datastream_by_value($dc_xml, 'DC', "Dublin Core", 'text/xml');
@@ -201,7 +213,7 @@ function create_batch_objects($label, $content_model, $object_files, $collection
   foreach ($object_files as $ext => $filename) {
     $file_mimetype = $mime_helper->get_mimetype($filename);
     if (in_array($file_mimetype, $allowed_mime_types)) {
-      $filename = preg_replace('/\/\//','/', $filename);
+      $filename = preg_replace('/\/\//', '/', $filename);
       $added = $cm->execIngestRules($filename, $file_mimetype);
     }
     else {
@@ -223,7 +235,7 @@ function create_batch_objects($label, $content_model, $object_files, $collection
  * @param <string> $mods_xml
  * @return <string>
  */
-function batch_create_dc_from_mods($mods_xml) {
+function batch_create_dc_from_mods($xmlstr) {
   $path = drupal_get_path('module', 'fedora_repository');
   module_load_include('inc', 'fedora_repository', 'ObjectHelper');
   module_load_include('inc', 'fedora_repository', 'CollectionClass');
