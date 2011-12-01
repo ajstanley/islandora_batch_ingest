@@ -4,3 +4,5 @@ description = Adds tab to Collection View allowing batch ingestion
 dependencies[] = fedora_repository
 package = Islandora Tools
 core = 6.x
+version = 11.3beta2
+
