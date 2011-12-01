@@ -1,4 +1,3 @@
-; $Id$
 name = Islandora Batch Ingest
 description = Adds tab to Collection View allowing batch ingestion
 dependencies[] = fedora_repository
