@@ -185,7 +185,7 @@ function create_batch_objects($label, $content_model, $object_files, $collection
   module_load_include('inc', 'fedora_repository', 'ContentModel');
   module_load_include('inc', 'fedora_repository', 'MimeClass');
   module_load_include('inc', 'fedora_reppository', 'api/fedora_item');
-
+  module_load_include('inc', 'fedora_repository', 'api/dublin_core');
   $cm = ContentModel::loadFromModel($content_model, 'ISLANDORACM');
   $allowed_mime_types = $cm->getMimetypes();
   $mime_helper = new MimeClass();
@@ -207,6 +207,10 @@ function create_batch_objects($label, $content_model, $object_files, $collection
       $dc_xml = batch_create_dc_from_mods($mods_xml);
       $item->modify_datastream_by_value($dc_xml, 'DC', "Dublin Core", 'text/xml');
     }
+    $dc = new dublin_core($item);
+    $titles = $dc->dc['dc:title'];
+    $label = $titles[0];
+    $item->modify_object($label);
   }
 
   unset($object_files['xml']);
