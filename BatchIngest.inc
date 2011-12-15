@@ -184,8 +184,8 @@ function batch_creation_form_submit($form, &$form_state) {
 function create_batch_objects($label, $content_model, $object_files, $collection_pid, $namespace, $metadata) {
   module_load_include('inc', 'fedora_repository', 'ContentModel');
   module_load_include('inc', 'fedora_repository', 'MimeClass');
-  module_load_include('inc', 'fedora_reppository', 'api/fedora_item');
-
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  module_load_include('inc', 'fedora_repository', 'api/dublin_core');
   $cm = ContentModel::loadFromModel($content_model, 'ISLANDORACM');
   $allowed_mime_types = $cm->getMimetypes();
   $mime_helper = new MimeClass();
@@ -200,6 +200,8 @@ function create_batch_objects($label, $content_model, $object_files, $collection
     $identifier = $xml->getName();
     if ($identifier == 'dc') {
       $item->modify_datastream_by_value($data, 'DC', "Dublin Core", 'text/xml');
+      $mods_stream = batch_create_mods_from_dc($data);
+      $item->add_datastream_from_string($mods_stream, 'MODS');
     }
     if ($identifier == 'mods') {
       $mods_xml = $data;
@@ -207,6 +209,16 @@ function create_batch_objects($label, $content_model, $object_files, $collection
       $dc_xml = batch_create_dc_from_mods($mods_xml);
       $item->modify_datastream_by_value($dc_xml, 'DC', "Dublin Core", 'text/xml');
     }
+    $dc = new dublin_core($item);
+    $titles = $dc->dc['dc:title'];
+    $title = $titles[0];
+    $item->modify_object($title);
+  }
+  else {
+    $dc = new dublin_core($item);
+    $dc_stream = $dc->as_xml();
+    $mods_stream = batch_create_mods_from_dc($dc_stream);
+    $item->add_datastream_from_string($mods_stream, 'MODS');
   }
 
   unset($object_files['xml']);
@@ -232,11 +244,11 @@ function create_batch_objects($label, $content_model, $object_files, $collection
 
 /**
  * transforms mods to dc
- * @param <string> $mods_xml
- * @return <string>
+ * @param string $mods_xml
+ * @return string
  */
 function batch_create_dc_from_mods($xmlstr) {
-  $path = drupal_get_path('module', 'fedora_repository');
+  $path = drupal_get_path('module', 'islandora_batch_ingest');
   module_load_include('inc', 'fedora_repository', 'ObjectHelper');
   module_load_include('inc', 'fedora_repository', 'CollectionClass');
 
@@ -252,7 +264,7 @@ function batch_create_dc_from_mods($xmlstr) {
   }
 
   $xsl = new DomDocument();
-  $xsl->load($path . '/xsl/mods_to_dc.xsl');
+  $xsl->load($path . '/xslt/mods_to_dc.xsl');
   $input = new DomDocument();
   $input->loadXML(trim($xmlstr));
   $xsl = $proc->importStylesheet($xsl);
@@ -260,6 +272,38 @@ function batch_create_dc_from_mods($xmlstr) {
   $dc_xml = $newdom->saveXML();
 
   return $dc_xml;
+}
+
+/**
+ * transforms dc to mods
+ * @param string $mods_xml
+ * @return string
+ */
+function batch_create_mods_from_dc($xmlstr) {
+  $path = drupal_get_path('module', 'islandora_batch_ingest');
+  module_load_include('inc', 'fedora_repository', 'ObjectHelper');
+  module_load_include('inc', 'fedora_repository', 'CollectionClass');
+
+  if ($xmlstr == NULL || strlen($xmlstr) < 5) {
+    return " ";
+  }
+
+  try {
+    $proc = new XsltProcessor();
+  } catch (Exception $e) {
+    drupal_set_message(t('@e', array('@e' => check_plain($e->getMessage()))), 'error');
+    return " ";
+  }
+
+  $xsl = new DomDocument();
+  $xsl->load($path . '/xslt/dc_to_mods.xsl');
+  $input = new DomDocument();
+  $input->loadXML(trim($xmlstr));
+  $xsl = $proc->importStylesheet($xsl);
+  $newdom = $proc->transformToDoc($input);
+  $mods_xml = $newdom->saveXML();
+
+  return $mods_xml;
 }
 
 /**
