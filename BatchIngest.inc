@@ -206,9 +206,10 @@ function create_batch_objects($label, $content_model, $object_files, $collection
     if ($identifier == 'mods') {
       $mods_stream = $data;
       $item->add_datastream_from_string($mods_stream, 'MODS', 'MODS', 'text/xml','X');
-      $dc_xml = batch_create_dc_from_mods($mods_xml);
+      $dc_xml = batch_create_dc_from_mods($mods_stream);
       $item->modify_datastream_by_value($dc_xml, 'DC', "Dublin Core", 'text/xml', 'X');
     }
+
     $dc = new dublin_core($item);
     $titles = $dc->dc['dc:title'];
     $title = $titles[0];
