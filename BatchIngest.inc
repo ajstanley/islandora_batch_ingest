@@ -204,7 +204,7 @@ function create_batch_objects($label, $content_model, $object_files, $collection
       $item->add_datastream_from_string($mods_stream, 'MODS', 'MODS', 'text/xml','X');
     }
     if ($identifier == 'mods') {
-      $mods_xml = $data;
+      $mods_stream = $data;
       $item->add_datastream_from_string($mods_stream, 'MODS', 'MODS', 'text/xml','X');
       $dc_xml = batch_create_dc_from_mods($mods_xml);
       $item->modify_datastream_by_value($dc_xml, 'DC', "Dublin Core", 'text/xml', 'X');
