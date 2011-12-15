@@ -199,15 +199,15 @@ function create_batch_objects($label, $content_model, $object_files, $collection
     $xml = simplexml_load_string($data);
     $identifier = $xml->getName();
     if ($identifier == 'dc') {
-      $item->modify_datastream_by_value($data, 'DC', "Dublin Core", 'text/xml');
+      $item->modify_datastream_by_value($data, 'DC', "Dublin Core", 'text/xml', 'X');
       $mods_stream = batch_create_mods_from_dc($data);
-      $item->add_datastream_from_string($mods_stream, 'MODS');
+      $item->add_datastream_from_string($mods_stream, 'MODS', 'MODS', 'text/xml','X');
     }
     if ($identifier == 'mods') {
       $mods_xml = $data;
-      $item->add_datastream_from_string($mods_xml, 'MODS');
+      $item->add_datastream_from_string($mods_stream, 'MODS', 'MODS', 'text/xml','X');
       $dc_xml = batch_create_dc_from_mods($mods_xml);
-      $item->modify_datastream_by_value($dc_xml, 'DC', "Dublin Core", 'text/xml');
+      $item->modify_datastream_by_value($dc_xml, 'DC', "Dublin Core", 'text/xml', 'X');
     }
     $dc = new dublin_core($item);
     $titles = $dc->dc['dc:title'];
@@ -218,7 +218,8 @@ function create_batch_objects($label, $content_model, $object_files, $collection
     $dc = new dublin_core($item);
     $dc_stream = $dc->as_xml();
     $mods_stream = batch_create_mods_from_dc($dc_stream);
-    $item->add_datastream_from_string($mods_stream, 'MODS');
+    $item->add_datastream_from_string($mods_stream, 'MODS', 'MODS', 'text/xml','X');
+
   }
 
   unset($object_files['xml']);
