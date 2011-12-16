@@ -234,7 +234,7 @@ function create_batch_objects($label, $content_model, $object_files, $collection
       $item->purge("$pid $label not ingested.  $file_mimetype not permitted in objects associated with $content_model");
       continue;
     }
-    $item->add_datastream_from_file($filename, "Source_File");
+    $item->add_datastream_from_file($filename, "OBJ");
 
     if (!empty($_SESSION['fedora_ingest_files'])) {
       foreach ($_SESSION['fedora_ingest_files'] as $dsid => $datastream_file) {
