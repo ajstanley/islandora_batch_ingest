@@ -1,20 +1,20 @@
 <xsl:stylesheet version="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mods="http://www.loc.gov/mods/v3" exclude-result-prefixes="mods" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:srw_dc="info:srw/schema/1/dc-schema" xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-<!-- 
-This stylesheet transforms MODS version 3.2 records and collections of records to simple Dublin Core (DC) records, 
-based on the Library of Congress' MODS to simple DC mapping <http://www.loc.gov/standards/mods/mods-dcsimple.html> 
-		
+<!--
+This stylesheet transforms MODS version 3.2 records and collections of records to simple Dublin Core (DC) records,
+based on the Library of Congress' MODS to simple DC mapping <http://www.loc.gov/standards/mods/mods-dcsimple.html>
+
 The stylesheet will transform a collection of MODS 3.2 records into simple Dublin Core (DC)
 as expressed by the SRU DC schema <http://www.loc.gov/standards/sru/dc-schema.xsd>
 
 The stylesheet will transform a single MODS 3.2 record into simple Dublin Core (DC)
 as expressed by the OAI DC schema <http://www.openarchives.org/OAI/2.0/oai_dc.xsd>
-		
-Because MODS is more granular than DC, transforming a given MODS element or subelement to a DC element frequently results in less precise tagging, 
-and local customizations of the stylesheet may be necessary to achieve desired results. 
 
-This stylesheet makes the following decisions in its interpretation of the MODS to simple DC mapping: 
-	
+Because MODS is more granular than DC, transforming a given MODS element or subelement to a DC element frequently results in less precise tagging,
+and local customizations of the stylesheet may be necessary to achieve desired results.
+
+This stylesheet makes the following decisions in its interpretation of the MODS to simple DC mapping:
+
 When the roleTerm value associated with a name is creator, then name maps to dc:creator
 When there is no roleTerm value associated with name, or the roleTerm value associated with name is a value other than creator, then name maps to dc:contributor
 Start and end dates are presented as span dates in dc:date and in dc:coverage
@@ -22,24 +22,25 @@ When the first subelement in a subject wrapper is topic, subject subelements are
 Some subject subelements, i.e., geographic, temporal, hierarchicalGeographic, and cartographics, are also parsed into dc:coverage
 The subject subelement geographicCode is dropped in the transform
 
-	
+
 Revision 1.1	2007-05-18 <tmee@loc.gov>
 		Added modsCollection conversion to DC SRU
 		Updated introductory documentation
-	
+
 Version 1.0	2007-05-04 Tracy Meehleib <tmee@loc.gov>
 
 -->
 
 	<xsl:output method="xml" indent="yes"/>
-	
+
 	<xsl:template match="/">
 		<xsl:choose>
-		<xsl:when test="//mods:modsCollection">			
+		<xsl:when test="//mods:modsCollection">
 			<srw_dc:dcCollection xsi:schemaLocation="info:srw/schema/1/dc-schema http://www.loc.gov/standards/sru/dc-schema.xsd">
 				<xsl:apply-templates/>
-			<xsl:for-each select="mods:modsCollection/mods:mods">			
-				<srw_dc:dc xsi:schemaLocation="info:srw/schema/1/dc-schema http://www.loc.gov/standards/sru/dc-schema.xsd">
+			<xsl:for-each select="mods:modsCollection/mods:mods">
+	:67
+        <srw_dc:dc xsi:schemaLocation="info:srw/schema/1/dc-schema http://www.loc.gov/standards/sru/dc-schema.xsd">
 
 				<xsl:apply-templates/>
 			</srw_dc:dc>
@@ -56,7 +57,7 @@ Version 1.0	2007-05-04 Tracy Meehleib <tmee@loc.gov>
 		</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
-	
+
 	<xsl:template match="mods:titleInfo">
 		<dc:title>
 			<xsl:value-of select="mods:nonSort"/>
@@ -82,7 +83,6 @@ Version 1.0	2007-05-04 Tracy Meehleib <tmee@loc.gov>
 			</xsl:if>
 		</dc:title>
 
-	</xsl:template>
 	</xsl:template>
 
 	<xsl:template match="mods:name">
@@ -115,7 +115,7 @@ Version 1.0	2007-05-04 Tracy Meehleib <tmee@loc.gov>
 
 				<xsl:if test="position()!=last()">--</xsl:if>
 			</xsl:for-each>
-			
+
 			<xsl:for-each select="mods:occupation">
 				<xsl:value-of select="."/>
 				<xsl:if test="position()!=last()">--</xsl:if>
@@ -421,19 +421,19 @@ Version 1.0	2007-05-04 Tracy Meehleib <tmee@loc.gov>
 			</dc:date>
 
 	</xsl:template>
-	
+
 	<xsl:template match="mods:temporal[@point='start']  ">
 		<xsl:value-of select="."/>-<xsl:value-of select="../mods:temporal[@point='end']"/>
 	</xsl:template>
-	
+
 	<xsl:template match="mods:temporal[@point!='start' and @point!='end']  ">
 		<xsl:value-of select="."/>
 	</xsl:template>
-	
+
 	<!-- suppress all else:-->
 
 	<xsl:template match="*"/>
-		
 
-	
+
+
 </xsl:stylesheet>
