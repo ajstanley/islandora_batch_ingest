@@ -204,11 +204,12 @@ function create_batch_objects($label, $content_model, $object_files, $collection
       $item->add_datastream_from_string($mods_stream, 'MODS', 'MODS', 'text/xml','X');
     }
     if ($identifier == 'mods') {
-      $mods_xml = $data;
+      $mods_stream = $data;
       $item->add_datastream_from_string($mods_stream, 'MODS', 'MODS', 'text/xml','X');
-      $dc_xml = batch_create_dc_from_mods($mods_xml);
+      $dc_xml = batch_create_dc_from_mods($mods_stream);
       $item->modify_datastream_by_value($dc_xml, 'DC', "Dublin Core", 'text/xml', 'X');
     }
+
     $dc = new dublin_core($item);
     $titles = $dc->dc['dc:title'];
     $title = $titles[0];
@@ -233,7 +234,7 @@ function create_batch_objects($label, $content_model, $object_files, $collection
       $item->purge("$pid $label not ingested.  $file_mimetype not permitted in objects associated with $content_model");
       continue;
     }
-    $item->add_datastream_from_file($filename, "Source_File");
+    $item->add_datastream_from_file($filename, "OBJ");
 
     if (!empty($_SESSION['fedora_ingest_files'])) {
       foreach ($_SESSION['fedora_ingest_files'] as $dsid => $datastream_file) {
