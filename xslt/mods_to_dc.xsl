@@ -66,8 +66,10 @@ Version 1.0	2007-05-04 Tracy Meehleib <tmee@loc.gov>
 			</xsl:if>
 			<xsl:value-of select="mods:title"/>
 			<xsl:if test="mods:subTitle">
+                           <xsl:if test="text() [normalize-space(.) ]">
 				<xsl:text>: </xsl:text>
 				<xsl:value-of select="mods:subTitle"/>
+                           </xsl:if>
 			</xsl:if>
 			<xsl:if test="mods:partNumber">
 
@@ -80,6 +82,7 @@ Version 1.0	2007-05-04 Tracy Meehleib <tmee@loc.gov>
 			</xsl:if>
 		</dc:title>
 
+	</xsl:template>
 	</xsl:template>
 
 	<xsl:template match="mods:name">
