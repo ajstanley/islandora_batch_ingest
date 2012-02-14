@@ -8,6 +8,9 @@ function islandora_batch_ingest_islandora_tabs($content_models, $pid) {
   module_load_include('inc', 'islandora_batch_ingest', 'BatchIngest');
   module_load_include('inc', 'fedora_repository', 'CollectionPolicy');
   $policy = CollectionPolicy::loadFromCollection($pid, TRUE);
+  if(!$policy){
+    return;
+  }
   $cms = $policy->getContentModels();
   $empty = TRUE;
   foreach ($cms as $cm) {
