@@ -1,48 +1,30 @@
 <?php
 
-function islandora_batch_ingest_islandora_tabs($content_models, $pid) {
-
-  if (!user_access('create batch process')) {
-    return;
-  }
-  module_load_include('inc', 'islandora_batch_ingest', 'BatchIngest');
-  module_load_include('inc', 'fedora_repository', 'CollectionPolicy');
-  $policy = CollectionPolicy::loadFromCollection($pid, TRUE);
-  if(!$policy){
-    return;
-  }
-  $cms = $policy->getContentModels();
-  $empty = TRUE;
-  foreach ($cms as $cm) {
-    if ($cm->pid != "islandora:collectionCModel") {
-      $empty = FALSE;
-    }
-  }
-  if($empty){
-    return;
-  }
-  $content_model_pids = array();
-  $tabset = array();
-  foreach ($content_models as $content_model) {
-    $content_model_pids[] = $content_model->pid;
-  }
-  if (in_array('islandora:collectionCModel', $content_model_pids)) {
-    $content = drupal_get_form('batch_creation_form', $pid);
-    $tabset['batch_ingest_tab'] = array(
-      '#type' => 'tabpage',
-      '#title' => t('Batch Ingest'),
-      '#content' => drupal_get_form('batch_creation_form', $pid),
-    );
-  }
-
-  
-    return $tabset;
-
-
+function islandora_batch_ingest_menu() {
+  $items['islandora/collection/batch'] = array(
+    'title' => t('Harvest into Collection'),
+    'page callback' => 'get_collection_batch_form',
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('create batch process'),
+  );
+  return $items;
 }
 
 function islandora_batch_ingest_perm() {
   return array(
     'create batch process',
   );
+}
+
+function islandora_batch_ingest_islandora_collection_mangement($pid) {
+  global $user;
+  if (user_access('create batch process')) {
+    return l('Batch Ingest', "islandora/collection/batch/$pid");
+  }
+}
+
+function get_collection_batch_form($pid) {
+  module_load_include('inc', 'islandora_batch_ingest', 'BatchIngest');
+  module_load_include('inc', 'islandora_harvester', "harvest_form");
+  return drupal_get_form('batch_creation_form', $pid);
 }

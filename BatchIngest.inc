@@ -33,7 +33,10 @@ function batch_creation_form(&$form_state, $collection_pid) {
 
   $mappings = implode('~~~', $name_mappings);
   $form['#attributes']['enctype'] = 'multipart/form-data';
-
+  $form['link'] = array(
+    '#type' => 'item',
+    '#value' => l(t("Return to collection"), "fedora/repository/$collection_pid"),
+  );
   $form['titlebox'] = array(
     '#type' => 'item',
     '#value' => t("Batch ingest into $collection_pid"),
@@ -169,7 +172,7 @@ function batch_creation_form_submit($form, &$form_state) {
   }
   $batch['operations'][] = array('recursive_directory_delete', array($tmp_dir));
   batch_set($batch);
-  batch_process();
+  batch_process("fedora/repository/$collection_pid");
 }
 
 /**
