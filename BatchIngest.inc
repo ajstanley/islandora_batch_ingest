@@ -35,7 +35,7 @@ function batch_creation_form(&$form_state, $collection_pid) {
   $form['#attributes']['enctype'] = 'multipart/form-data';
   $form['link'] = array(
     '#type' => 'item',
-    '#value' => l(t("Return to collection"), "fedora/repository/$collection_pid"),
+    '#value' => l(t("Return to collection view"), "fedora/repository/$collection_pid"),
   );
   $form['titlebox'] = array(
     '#type' => 'item',
@@ -189,12 +189,13 @@ function create_batch_objects($label, $content_model, $object_files, $collection
   module_load_include('inc', 'fedora_repository', 'MimeClass');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   module_load_include('inc', 'fedora_repository', 'api/dublin_core');
+  global $user;
   $cm = ContentModel::loadFromModel($content_model, 'ISLANDORACM');
   $allowed_mime_types = $cm->getMimetypes();
   $mime_helper = new MimeClass();
   $pid = fedora_item::get_next_PID_in_namespace($namespace);
 
-  $item = Fedora_item::ingest_new_item($pid, 'A', $label, $owner);
+  $item = Fedora_item::ingest_new_item($pid, 'A', $label, $user->name);
   $item->add_relationship('hasModel', $content_model, FEDORA_MODEL_URI);
   $item->add_relationship('isMemberOfCollection', $collection_pid);
   if ($object_files['xml']) {
