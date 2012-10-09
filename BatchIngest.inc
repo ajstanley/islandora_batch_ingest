@@ -194,7 +194,7 @@ function create_batch_objects($label, $content_model, $object_files, $collection
   $allowed_mime_types = $cm->getMimetypes();
   $mime_helper = new MimeClass();
   $pid = fedora_item::get_next_PID_in_namespace($namespace);
-  $owner = ($user->uid > 0)? $user->name: t('Anonymous user');
+  $owner = ($user->uid > 0)? $user->name: 'anonymous';
 
   $item = Fedora_item::ingest_new_item($pid, 'A', $label, $owner);
   $item->add_relationship('hasModel', $content_model, FEDORA_MODEL_URI);
