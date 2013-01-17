@@ -159,7 +159,11 @@ function batch_creation_form_submit($form, &$form_state) {
     drupal_set_message("$content_model not found", "error");
     return;
   }
-
+  $item = new Fedora_Item($collection_pid);
+  $policy = NULL;
+  if (array_key_exists('CHILD_SECURITY', $item->datastreams)) {
+    $policy = $item->get_datastream_dissemination('CHILD_SECURITY');
+  }
   $batch = array(
     'title' => 'Ingesting Objects',
     'operations' => array(),
@@ -168,7 +172,7 @@ function batch_creation_form_submit($form, &$form_state) {
 
 
   foreach ($file_list as $label => $object_files) {
-    $batch['operations'][] = array('create_batch_objects', array($label, $content_model, $object_files, $collection_pid, $namespace, $metadata));
+    $batch['operations'][] = array('create_batch_objects', array($label, $content_model, $object_files, $collection_pid, $namespace, $metadata, $policy));
   }
   $batch['operations'][] = array('recursive_directory_delete', array($tmp_dir));
   batch_set($batch);
@@ -184,7 +188,7 @@ function batch_creation_form_submit($form, &$form_state) {
  * @param <string> $namespace
  * @param <string> $metadata
  */
-function create_batch_objects($label, $content_model, $object_files, $collection_pid, $namespace, $metadata) {
+function create_batch_objects($label, $content_model, $object_files, $collection_pid, $namespace, $metadata, $policy) {
   module_load_include('inc', 'fedora_repository', 'ContentModel');
   module_load_include('inc', 'fedora_repository', 'MimeClass');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
@@ -194,7 +198,7 @@ function create_batch_objects($label, $content_model, $object_files, $collection
   $allowed_mime_types = $cm->getMimetypes();
   $mime_helper = new MimeClass();
   $pid = fedora_item::get_next_PID_in_namespace($namespace);
-  $owner = ($user->uid > 0)? $user->name: 'anonymous';
+  $owner = ($user->uid > 0) ? $user->name : 'anonymous';
 
   $item = Fedora_item::ingest_new_item($pid, 'A', $label, $owner);
   $item->add_relationship('hasModel', $content_model, FEDORA_MODEL_URI);
@@ -206,11 +210,11 @@ function create_batch_objects($label, $content_model, $object_files, $collection
     if ($identifier == 'dc') {
       $item->modify_datastream_by_value($data, 'DC', "Dublin Core", 'text/xml', 'X');
       $mods_stream = batch_create_mods_from_dc($data);
-      $item->add_datastream_from_string($mods_stream, 'MODS', 'MODS', 'text/xml','X');
+      $item->add_datastream_from_string($mods_stream, 'MODS', 'MODS', 'text/xml', 'X');
     }
     if ($identifier == 'mods') {
       $mods_stream = $data;
-      $item->add_datastream_from_string($mods_stream, 'MODS', 'MODS', 'text/xml','X');
+      $item->add_datastream_from_string($mods_stream, 'MODS', 'MODS', 'text/xml', 'X');
       $dc_xml = batch_create_dc_from_mods($mods_stream);
       $item->modify_datastream_by_value($dc_xml, 'DC', "Dublin Core", 'text/xml', 'X');
     }
@@ -224,10 +228,11 @@ function create_batch_objects($label, $content_model, $object_files, $collection
     $dc = new dublin_core($item);
     $dc_stream = $dc->as_xml();
     $mods_stream = batch_create_mods_from_dc($dc_stream);
-    $item->add_datastream_from_string($mods_stream, 'MODS', 'MODS', 'text/xml','X');
-
+    $item->add_datastream_from_string($mods_stream, 'MODS', 'MODS', 'text/xml', 'X');
   }
-
+  if ($policy) {
+    $item->add_datastream_from_string($policy, 'POLICY');
+  }
   unset($object_files['xml']);
   foreach ($object_files as $ext => $filename) {
     $file_mimetype = $mime_helper->get_mimetype($filename);
