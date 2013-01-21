@@ -250,7 +250,7 @@ function create_batch_objects($label, $content_model, $object_files, $collection
     if (!empty($_SESSION['fedora_ingest_files'])) {
       foreach ($_SESSION['fedora_ingest_files'] as $dsid => $datastream_file) {
         $parts = pathinfo($datastream_file);
-        $item->add_datastream_from_file($datastream_file, $datastream_id, $parts['basename']);
+        $item->add_datastream_from_file($datastream_file, $dsid, $parts['basename']);
       }
     }
   }
