@@ -206,17 +206,23 @@ function create_batch_objects($label, $content_model, $object_files, $collection
   if ($object_files['xml']) {
     $data = file_get_contents($object_files['xml']);
     $xml = simplexml_load_string($data);
+    $dcData = $xml->children('dc', TRUE);
+    $dcData->identifier = $pid;
     $identifier = $xml->getName();
     if ($identifier == 'dc') {
-      $item->modify_datastream_by_value($data, 'DC', "Dublin Core", 'text/xml', 'X');
+      $item->modify_datastream_by_value($xml->saveXML(), 'DC', "Dublin Core", 'text/xml', 'X');
       $mods_stream = batch_create_mods_from_dc($data);
       $item->add_datastream_from_string($mods_stream, 'MODS', 'MODS', 'text/xml', 'X');
     }
     if ($identifier == 'mods') {
       $mods_stream = $data;
       $item->add_datastream_from_string($mods_stream, 'MODS', 'MODS', 'text/xml', 'X');
-      $dc_xml = batch_create_dc_from_mods($mods_stream);
-      $item->modify_datastream_by_value($dc_xml, 'DC', "Dublin Core", 'text/xml', 'X');
+      $data = batch_create_dc_from_mods($mods_stream);
+      $xml = simplexml_load_string($data);
+      $dcData = $xml->children('dc', TRUE);
+      $dcData->identifier = $pid;
+
+      $item->modify_datastream_by_value($xml->saveXML(), 'DC', "Dublin Core", 'text/xml', 'X');
     }
 
     $dc = new dublin_core($item);
